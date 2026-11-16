@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<!-- ============================================================
+  journal.html — ВТОРАЯ СТРАНИЦА (журнал посещений)
+  Откройте её ПОСЛЕ первой страницы — там будут записи
+  ============================================================ -->
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Журнал посещений</title>
+
+  <style>
+    /* ===== СТИЛЬ ТЕРМИНАЛА ===== */
+    body {
+      margin: 0;
+      background: #0d1117;                 /* тёмный фон "консоли" */
+      color: #3fb950;                      /* зелёный текст, как в терминале */
+      font-family: 'Courier New', monospace;
+      padding: 24px;
+    }
+
+    /* Заголовок-строка приглашения root@server */
+    h1 {
+      font-size: 18px;
+      color: #c9d1d9;
+      border-bottom: 1px solid #30363d;
+      padding-bottom: 8px;
+    }
+
+    /* Синяя командная строка $ tail -f */
+    .cmd { color: #58a6ff; }
+
+    /* Записи журнала идут каждая с новой строки, без переноса */
+    #log div { white-space: pre; }
+
+    /* Сообщение "журнал пуст" — серым */
+    .empty { color: #8b949e; }
+
+    /* Кнопка очистки */
+    button {
+      margin-top: 16px;
+      background: #21262d;
+      color: #c9d1d9;
+      border: 1px solid #30363d;
+      padding: 6px 12px;
+      font-family: inherit;
+      cursor: pointer;
+    }
+  </style>
+<base target="_blank">
+</head>
+
+<body>
+  <!-- Шапка в стиле Linux-консоли -->
+  <h1>root@server:~# журнал посещений</h1>
+  <div class="cmd">$ tail -f /var/log/visits.log</div>
+
+  <!-- Сюда скрипт вставит строки журнала -->
+  <div id="log">
+    <div class="empty">[журнал пуст — сначала зайдите на первую страницу]</div>
+  </div>
+
+  <!-- Кнопка для очистки журнала -->
+  <button onclick="clearLog()">Очистить журнал</button>
+
+  <script>
+    // ===== РИСУЕМ ЖУРНАЛ НА ЭКРАНЕ =====
+    function render() {
+      // Читаем записи, которые сохранила первая страница
+      const log = JSON.parse(localStorage.getItem('visit_log') || '[]');
+      const el  = document.getElementById('log');
+
+      if (log.length) {
+        // Есть записи: выводим каждую как [дата время]  IP: x.x.x.x
+        el.innerHTML = log
+          .map(e => '<div>[' + e.date + ' ' + e.time + ']  IP: ' + e.ip + '</div>')
+          .join('');
+      } else {
+        // Записей нет
+        el.innerHTML = '<div class="empty">[журнал пуст — сначала зайдите на первую страницу]</div>';
+      }
+    }
+
+    // ===== ОЧИСТКА ЖУРНАЛА (вызывается кнопкой) =====
+    function clearLog() {
+      localStorage.removeItem('visit_log');
+      render();
+    }
+
+    render();   // рисуем журнал сразу при открытии страницы
+  </script>
+</body>
+</html>

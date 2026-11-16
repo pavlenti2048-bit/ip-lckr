@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<!-- ============================================================
+  index.html — ПЕРВАЯ СТРАНИЦА (то, что видит посетитель)
+  ============================================================ -->
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <!-- Для корректного отображения на телефонах -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- Название вкладки браузера — поменяйте на своё -->
+  <title>Главная</title>
+
+  <style>
+    /* ===== ОБЩИЙ ФОН И РАСПОЛОЖЕНИЕ ===== */
+    body {
+      margin: 0;
+      background: #0d1117;          /* тёмный фон страницы */
+      color: #c9d1d9;
+      font-family: 'Courier New', monospace;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;             /* контент по центру экрана */
+    }
+
+    /* ===== МИГАЮЩАЯ КАРТИНКА ===== */
+    /* Размер картинки: 80% ширины экрана, не больше 60% высоты */
+    img.flash {
+      max-width: 80vw;
+      max-height: 60vh;
+      animation: flash .12s steps(2) infinite;  /* мигание */
+    }
+    /* Само мигание: картинка резко становится ярко-белой */
+    @keyframes flash {
+      0%, 49% { filter: brightness(1); }        /* обычная яркость */
+      50%, 100% { filter: brightness(3) saturate(0); } /* белая вспышка */
+    }
+    /* Если хотите мигать медленнее — увеличьте .12s, например до .5s */
+
+    /* ===== ТЕКСТЫ ПОД КАРТИНКОЙ ===== */
+    .note { margin-top: 24px; font-size: 14px; color: #8b949e; }
+    .ip   { margin-top: 8px;  font-size: 16px; color: #58a6ff; }
+  </style>
+<base target="_blank">
+</head>
+
+<body>
+  <!-- ============================================================
+       ВАША КАРТИНКА
+       • Положите файл картинки рядом с index.html
+       • Замените "photo.jpg" на имя вашего файла (photo.png и т.д.)
+       • Если картинка не найдётся — покажется эмодзи 📷
+       ============================================================ -->
+  <img class="flash" src="fsociety.webp" alt="image"
+       onerror="this.outerHTML='<div style=&quot;font-size:48px&quot;>&#128247;</div>'">
+
+  <!-- Сюда скрипт вставит IP посетителя -->
+  <div class="ip" id="ip">Определяем IP...</div>
+
+  <!-- Уведомление посетителю (обязательно оставьте) -->
+  <div class="note">ваш айпи у меня</div>
+
+  <script>
+    // ===== ОПРЕДЕЛЕНИЕ IP И ЗАПИСЬ В ЖУРНАЛ =====
+    fetch('https://api.ipify.org?format=json')   // спрашиваем IP у публичного сервиса
+      .then(r => r.json())
+      .then(d => {
+        // 1. Показываем IP на странице
+        document.getElementById('ip').textContent = ' ' + d.ip;
+
+        // 2. Читаем старый журнал из памяти браузера (или пустой список)
+        const log = JSON.parse(localStorage.getItem('visit_log') || '[]');
+
+        // 3. Берём текущие дату и время
+        const now = new Date();
+
+        // 4. Добавляем новую запись: IP + дата + время
+        log.push({
+          ip:   d.ip,
+          date: now.toLocaleDateString('ru-RU'),  // формат: 16.11.2026
+          time: now.toLocaleTimeString('ru-RU')   // формат: 19:34:07
+        });
+
+        // 5. Сохраняем журнал обратно в память браузера
+        localStorage.setItem('visit_log', JSON.stringify(log));
+      })
+      .catch(() => {   // если интернет/сервис недоступен
+        document.getElementById('ip').textContent = 'Не удалось определить IP';
+      });
+  </script>
+</body>
+</html>
